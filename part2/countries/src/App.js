@@ -25,8 +25,6 @@ return (
 
 const Weather = ({country}) => {
   const [weatherReport, setWeatherReport] = useState(null)
-  console.log("WEATHER")
-  console.log(country)
 
   const [lat, lng] = country.latlng
 
@@ -40,7 +38,6 @@ const Weather = ({country}) => {
     useEffect(weatherHook, [])
 
     if (weatherReport){
-      console.log(weatherReport)
     return (
       <div>
         <h1> Weather in {country.capital} </h1>
@@ -64,8 +61,6 @@ const Weather = ({country}) => {
   )
 
 const Display = ({search, countriestoShow, shortCut, setShortCut}) => {
-
-  console.log("DISPLAY")
   
   if (shortCut){
     return (
@@ -122,8 +117,6 @@ const App = () => {
     setNewSearch(event.target.value)
   }
   const searchCountries = () => countries.filter(country => country.name.common.toLowerCase().includes(newSearch.toLowerCase()))
-
-  console.log(countries[0])
 
     return (
       <div>

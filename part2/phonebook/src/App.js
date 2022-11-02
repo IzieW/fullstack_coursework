@@ -1,8 +1,38 @@
 import {useState, useEffect } from "react"
 import axios from "axios"
 import personService from "./services/persons"
+import './index.css'
 
 // Simple phone book app - add names to phone book
+
+const Notificiation = ({info}) => {
+  //const [message, isWarning] = info 
+
+  if (info.message === null) {
+    return null
+  }
+
+  const notificationStyle = {
+    color:"green",
+    background: "lightgrey",
+    fontSize: 20,
+    borderStyle: "solid",
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 10,
+  }
+
+  if (info.warning){
+    notificationStyle.color = "red"
+  }
+
+  return (
+    <div style={notificationStyle}>
+      {info.message}
+    </div>
+  )
+}
+
 const Contact = (props) => (
   <li key={props.name}> {props.name}{props.number}</li>
 )
@@ -43,6 +73,10 @@ const App = () => {
 
   const [persons, setPersons] = useState([])
 
+  const [notificationMessage, setNotificationMessage] = useState({
+    message: null, 
+    warning: false
+  })
 
   const hook = () => {
     personService
@@ -62,18 +96,25 @@ const App = () => {
       personService.create( {name: newName, number:newNumber})
       .then(response => {
         setPersons(persons.concat(response))
+        setNotificationMessage({...notificationMessage, message: `Added ${response.name}`})
+        setTimeout(() => setNotificationMessage({...notificationMessage, message: null}), 5000)
         setNewNumber("")
         setNewName("")}
         )
 
       } else {
         if (window.confirm(match.name + " is already added to the phonebook, replace the old number with a new one?")){
-          console.log({...match, number:newNumber})
           personService.update(match.id, {...match, number: newNumber})
           .then( response => {
             setPersons(persons.map(person => person.id !== match.id ? person: response))
           }
           )
+          .catch(error => {
+            setNotificationMessage({message:`Information of ${error.name} has already been removed from server`, warning: true})
+            setTimeout(
+              ()=>setNotificationMessage({message: null, warning: false}), 5000
+            )
+          })
         }
       }
   }
@@ -84,7 +125,6 @@ const App = () => {
 
   const deletePerson = (id) => {
     const personToDelete = persons.find(person => person.id === id)
-    console.log(personToDelete)
     if (window.confirm(`Delete ${personToDelete.name}?`)) {
     setPersons(persons.filter(person => person.id !== id))
     personService.deleteContact(id)
@@ -95,6 +135,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notificiation info = {notificationMessage} />
       <Filter search = {newSearch} handler = {setNewSearch} />
       <h2> Add a new contact </h2>
       <PersonsForm updateNames = {updateNames} newName = {newName} newNumber= {newNumber} setName = {setNewName} setNumber={setNewNumber} />
